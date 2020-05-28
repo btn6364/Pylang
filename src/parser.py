@@ -10,10 +10,16 @@ class Parser:
         raise Exception("[ERROR]: Parser error")
 
     def get_next_token(self):
+        """
+        Get the next token in the token array.
+        """
         self.token_idx += 1
         return self.tokens[self.token_idx]
 
     def eat(self, token_type):
+        """
+        Consume the current token if it matches the token type. Then set the current token to the next one.
+        """
         if self.current_token.type == token_type:
             self.current_token = self.get_next_token()
         else:
@@ -58,4 +64,7 @@ class Parser:
         return result
 
     def parse(self):
+        """
+        Parse the lexer
+        """
         return self.expr()

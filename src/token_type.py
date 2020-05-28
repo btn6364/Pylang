@@ -1,3 +1,7 @@
+"""
+Contain all token types
+"""
+
 INTEGER = "INTEGER"
 FLOAT = "FLOAT"
 PLUS = "PLUS"

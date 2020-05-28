@@ -1,2 +1,4 @@
-term -> INTEGER | FLOAT
-expr -> term PLUS term | term MINUS term | term
+expr : term((PLUS|MINUS)term)*
+term : factor((MUL|DIV)factor)*
+factor : INTEGER|FLOAT
+

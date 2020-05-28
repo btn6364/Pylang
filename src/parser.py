@@ -3,8 +3,8 @@ from src.token_type import PLUS, MINUS, MULTIPLY, DIVIDE
 class Parser:
     def __init__(self, tokens):
         self.tokens = tokens
-        self.token_idx = -1
-        self.current_token = None
+        self.token_idx = 0
+        self.current_token = self.tokens[self.token_idx]
 
     def parser_error(self):
         raise Exception("[ERROR]: Parser error")
@@ -19,23 +19,35 @@ class Parser:
         else:
             self.parser_error()
 
-    def term(self):
+    def factor(self):
         """
-        Return an INTEGER or FLOAT value
+        Rule: factor: INTEGER|FLOAT
         """
         token = self.current_token
         self.eat(token.type)
         return token.value
 
+    def term(self):
+        """
+        Rule: term: factor ((MUL|DIV) factor)*
+        """
+        result = self.factor()
+        while self.current_token.type in (MULTIPLY, DIVIDE):
+            token = self.current_token
+            if token.type == MULTIPLY:
+                self.eat(MULTIPLY)
+                result *= self.factor()
+            elif token.type == DIVIDE:
+                self.eat(DIVIDE)
+                result /= self.factor()
+        return result
+
     def expr(self):
         """
-        expr -> INTEGER PLUS INTEGER
-        expr -> INTEGER MINUS INTEGER
+        Rule: expr: term ((PLUS|MINUS) term)*
         """
-        self.current_token = self.get_next_token()
-
         result = self.term()
-        while self.current_token.type in (PLUS, MINUS, MULTIPLY, DIVIDE):
+        while self.current_token.type in (PLUS, MINUS):
             token = self.current_token
             if token.type == PLUS:
                 self.eat(PLUS)
@@ -43,12 +55,6 @@ class Parser:
             elif token.type == MINUS:
                 self.eat(MINUS)
                 result -= self.term()
-            elif token.type == MULTIPLY:
-                self.eat(MULTIPLY)
-                result *= self.term()
-            elif token.type == DIVIDE:
-                self.eat(DIVIDE)
-                result /= self.term()
         return result
 
     def parse(self):

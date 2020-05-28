@@ -11,8 +11,8 @@ class Tokenizer:
         self.current_char = self.text[self.pos]
         self.tokens = []
 
-    def tokenizer_error(self):
-        raise Exception("[ERROR]: tokenizer error")
+    def tokenizer_error(self, detail):
+        raise Exception(f"[ERROR]: {detail} is not defined")
 
     def next(self):
         """
@@ -28,7 +28,7 @@ class Tokenizer:
         """
         Skip whitespaces in the input
         """
-        while self.current_char != None and self.current_char.isspace():
+        while self.current_char is not None and self.current_char.isspace():
             self.next()
 
     def multi_digit_number(self):
@@ -36,7 +36,7 @@ class Tokenizer:
         Construct multiple-digit numbers
         """
         result = ""
-        while self.current_char != None and (self.current_char.isdigit() or self.current_char == "."):
+        while self.current_char is not None and (self.current_char.isdigit() or self.current_char == "."):
             result += self.current_char
             self.next()
         if "." in result:
@@ -49,7 +49,7 @@ class Tokenizer:
         Initialize a steam of tokens from the user input
         :return: the set of tokens
         """
-        while self.current_char != None:
+        while self.current_char:
             if self.current_char.isspace():
                 self.skip_whitespaces()
             elif self.current_char.isdigit():
@@ -67,6 +67,6 @@ class Tokenizer:
                 self.next()
                 self.tokens.append(Token(DIVIDE, "/"))
             else:
-                self.tokenizer_error()
+                self.tokenizer_error(self.current_char)
         self.tokens.append(Token(EOF, None))
         return self.tokens

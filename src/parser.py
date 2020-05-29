@@ -1,5 +1,25 @@
 from src.token_type import INTEGER, FLOAT, PLUS, MINUS, MULTIPLY, DIVIDE, LPAREN, RPAREN
 
+"""
+Abstract syntax tree
+"""
+class AST:
+    pass
+
+class BinOp(AST):
+    def __init__(self, left, op, right):
+        self.left = left
+        self.token = self.op = op
+        self.right = right
+
+class Num(AST):
+    def __init__(self, token):
+        self.token = token
+        self.value = token.value
+
+"""
+Parser that will parse the tokens array
+"""
 class Parser:
     def __init__(self, tokens):
         self.tokens = tokens
@@ -32,45 +52,43 @@ class Parser:
         token = self.current_token
         if token.type in (INTEGER, FLOAT):
             self.eat(token.type)
-            return token.value
+            return Num(token)
         elif token.type == LPAREN:
             self.eat(LPAREN)
-            result = self.expr()
+            node = self.expr()
             self.eat(RPAREN)
-            return result
+            return node
 
     def term(self):
         """
         Rule: term: factor ((MUL|DIV) factor)*
         """
-        result = self.factor()
+        node = self.factor()
         while self.current_token.type in (MULTIPLY, DIVIDE):
             token = self.current_token
             if token.type == MULTIPLY:
                 self.eat(MULTIPLY)
-                result *= self.factor()
             elif token.type == DIVIDE:
                 self.eat(DIVIDE)
-                result /= self.factor()
-        return result
+            node = BinOp(left=node, op=token, right=self.factor())
+        return node
 
     def expr(self):
         """
         Rule: expr: term ((PLUS|MINUS) term)*
         """
-        result = self.term()
+        node = self.term()
         while self.current_token.type in (PLUS, MINUS):
             token = self.current_token
             if token.type == PLUS:
                 self.eat(PLUS)
-                result += self.term()
             elif token.type == MINUS:
                 self.eat(MINUS)
-                result -= self.term()
-        return result
+            node = BinOp(left=node, op=token, right=self.term())
+        return node
 
     def parse(self):
         """
-        Parse the lexer
+        Parse the lexer into a AST
         """
         return self.expr()

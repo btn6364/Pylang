@@ -1,4 +1,4 @@
-from src.token_type import INTEGER, FLOAT, PLUS, MINUS, MULTIPLY, DIVIDE, EOF
+from src.token_type import INTEGER, FLOAT, PLUS, MINUS, MULTIPLY, DIVIDE, LPAREN, RPAREN, EOF
 from src.token import Token
 
 """
@@ -66,6 +66,12 @@ class Tokenizer:
             elif self.current_char == "/":
                 self.next()
                 self.tokens.append(Token(DIVIDE, "/"))
+            elif self.current_char == "(":
+                self.next()
+                self.tokens.append(Token(LPAREN, "("))
+            elif self.current_char == ")":
+                self.next()
+                self.tokens.append(Token(RPAREN, ")"))
             else:
                 self.tokenizer_error(self.current_char)
         self.tokens.append(Token(EOF, None))

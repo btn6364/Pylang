@@ -1,4 +1,4 @@
-from src.token_type import PLUS, MINUS, MULTIPLY, DIVIDE
+from src.token_type import INTEGER, FLOAT, PLUS, MINUS, MULTIPLY, DIVIDE, LPAREN, RPAREN
 
 class Parser:
     def __init__(self, tokens):
@@ -30,8 +30,14 @@ class Parser:
         Rule: factor: INTEGER|FLOAT
         """
         token = self.current_token
-        self.eat(token.type)
-        return token.value
+        if token.type in (INTEGER, FLOAT):
+            self.eat(token.type)
+            return token.value
+        elif token.type == LPAREN:
+            self.eat(LPAREN)
+            result = self.expr()
+            self.eat(RPAREN)
+            return result
 
     def term(self):
         """

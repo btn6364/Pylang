@@ -1,5 +1,11 @@
-from src.token_type import INTEGER, FLOAT, PLUS, MINUS, MULTIPLY, DIVIDE, LPAREN, RPAREN, EOF
+from src.token_type import INTEGER, FLOAT, PLUS, MINUS, MULTIPLY, DIVIDE, LPAREN, RPAREN, EOF, \
+                           BEGIN, END, ID, ASSIGN, DOT, SEMI
 from src.token import Token
+
+RESERVED_KEYWORDS = {
+    "BEGIN": Token("BEGIN", BEGIN),
+    "END": Token("END", END)
+}
 
 """
 The tokenizer that will break the code down into a stream of tokens.
@@ -24,6 +30,17 @@ class Tokenizer:
         else:
             self.current_char = self.text[self.pos]
 
+    def advance(self):
+        """
+        Move to one more position to check for assignment or equal operators
+        """
+        peek_pos = self.pos + 1
+        if peek_pos >= len(self.text):
+            return None
+        else:
+            return self.text[peek_pos]
+
+
     def skip_whitespaces(self):
         """
         Skip whitespaces in the input
@@ -44,6 +61,17 @@ class Tokenizer:
         else:
             return Token(INTEGER, int(result))
 
+    def id_keywords(self):
+        """
+        Handle ids and reserved keywords
+        """
+        result = ""
+        while self.current_char is not None and self.current_char.isalnum():
+            result += self.current_char
+            self.next()
+        token = RESERVED_KEYWORDS.get(result, Token(ID, result))
+        return token
+
     def create_tokens(self):
         """
         Initialize a steam of tokens from the user input
@@ -52,8 +80,26 @@ class Tokenizer:
         while self.current_char:
             if self.current_char.isspace():
                 self.skip_whitespaces()
+            #handle keywords and ids
+            elif self.current_char.isalpha():
+                self.tokens.append(self.id_keywords())
+            #handle numbers
             elif self.current_char.isdigit():
                 self.tokens.append(self.multi_digit_number())
+            #handle := assignment
+            elif self.current_char == ":" and self.advance() == "=":
+                self.next()
+                self.next()
+                self.tokens.append(Token(ASSIGN, ":="))
+            #handle semi
+            elif self.current_char == ";":
+                self.next()
+                self.tokens.append(Token(SEMI, ";"))
+            #handle dot
+            elif self.current_char == ".":
+                self.next()
+                self.tokens.append(Token(DOT, "."))
+            #handle +, - , * , / and ()
             elif self.current_char == "+":
                 self.next()
                 self.tokens.append(Token(PLUS, "+"))

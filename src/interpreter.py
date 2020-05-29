@@ -28,6 +28,27 @@ class Interpreter(NodeVisitor):
         self.text = text
         self.tokenizer = Tokenizer(self.text)
         self.parser = Parser(self.tokenizer.create_tokens())
+        self.GLOBAL_VARS = dict()
+
+    def visit_Compound(self, node):
+        for child in node.children:
+            self.visit(child)
+
+    def visit_Assign(self, node):
+        var_name = node.left.value
+        self.GLOBAL_VARS[var_name] = self.visit(node.right)
+
+    def visit_Var(self, node):
+        var_name = node.value
+        val = self.GLOBAL_VARS[var_name]
+        if val is None:
+            raise NameError(repr(var_name))
+        else:
+            return val
+
+
+    def visit_NoOp(self, node):
+        pass
 
     def visit_UnaryOp(self, node):
         if node.op.type == PLUS:
@@ -53,4 +74,6 @@ class Interpreter(NodeVisitor):
 
     def interpret(self):
         ast = self.parser.parse()
+        if not ast:
+            return ""
         return self.visit(ast)

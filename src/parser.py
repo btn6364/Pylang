@@ -1,26 +1,7 @@
-from src.token_type import INTEGER, FLOAT, PLUS, MINUS, MULTIPLY, DIVIDE, LPAREN, RPAREN
+from src.token_type import INTEGER, FLOAT, PLUS, MINUS, MULTIPLY, DIVIDE, LPAREN, RPAREN, \
+                           DOT, BEGIN, END, DOT, ASSIGN, ID, SEMI, EOF
+from src.ast import UnaryOp, BinOp, Num, NoOp, Compound, Assign, Var
 
-"""
-Abstract syntax tree
-"""
-class AST:
-    pass
-
-class UnaryOp(AST):
-    def __init__(self, op, expr):
-        self.token = self.op = op
-        self.expr = expr
-
-class BinOp(AST):
-    def __init__(self, left, op, right):
-        self.left = left
-        self.token = self.op = op
-        self.right = right
-
-class Num(AST):
-    def __init__(self, token):
-        self.token = token
-        self.value = token.value
 
 """
 Parser that will parse the tokens array
@@ -50,9 +31,81 @@ class Parser:
         else:
             self.parser_error()
 
+    def program(self):
+        """
+        Program: BEGIN compound statement
+        """
+        node = self.compound_statement()
+        self.eat(DOT)
+        return node
+
+    def compound_statement(self):
+        """
+        Compound_statement: BEGIN statement_list END
+        """
+        self.eat(BEGIN)
+        nodes = self.statement_list()
+        self.eat(END)
+
+        root = Compound()
+        for node in nodes:
+            root.children.append(node)
+
+        return root
+
+    def statement_list(self):
+        """
+        statement_list: statement | statement SEMI statement_list
+        """
+        node = self.statement()
+        results = [node]
+        while self.current_token.type == SEMI:
+            self.eat(SEMI)
+            results.append(self.statement())
+        if self.current_token.type == ID:
+            self.parser_error()
+        return results
+
+    def statement(self):
+        """
+        statement: compound_statement | assignment_statement | empty
+        """
+        if self.current_token.type == BEGIN:
+            node = self.compound_statement()
+        elif self.current_token.type == ID:
+            node = self.assignment_statement()
+        else:
+            node = self.empty()
+        return node
+
+    def assignment_statement(self):
+        """
+        assignement_statement: variable ASSIGN expr
+        """
+        left = self.variable()
+        token = self.current_token
+        self.eat(ASSIGN)
+        right = self.expr()
+        node = Assign(left, token, right)
+        return node
+
+    def variable(self):
+        """
+        variable: ID
+        """
+        node = Var(self.current_token)
+        self.eat(ID)
+        return node
+
+    def empty(self):
+        """
+        Empty production
+        """
+        return NoOp()
+
     def factor(self):
         """
-        Rule: factor: INTEGER|FLOAT
+        Rule: factor: PLUS factor | MINUS factor | INTEGER | FLOAT | LPAREN expr RPAREN | variable
         """
         token = self.current_token
         if token.type == PLUS:
@@ -70,6 +123,9 @@ class Parser:
             self.eat(LPAREN)
             node = self.expr()
             self.eat(RPAREN)
+            return node
+        else:
+            node = self.variable()
             return node
 
     def term(self):
@@ -104,4 +160,8 @@ class Parser:
         """
         Parse the lexer into a AST
         """
-        return self.expr()
+        node = self.program()
+        if self.current_token.type != EOF:
+            raise Exception("Expect end of the program here!")
+
+        return node

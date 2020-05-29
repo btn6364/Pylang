@@ -6,6 +6,11 @@ Abstract syntax tree
 class AST:
     pass
 
+class UnaryOp(AST):
+    def __init__(self, op, expr):
+        self.token = self.op = op
+        self.expr = expr
+
 class BinOp(AST):
     def __init__(self, left, op, right):
         self.left = left
@@ -50,7 +55,15 @@ class Parser:
         Rule: factor: INTEGER|FLOAT
         """
         token = self.current_token
-        if token.type in (INTEGER, FLOAT):
+        if token.type == PLUS:
+            self.eat(PLUS)
+            node = UnaryOp(token, self.factor())
+            return node
+        elif token.type == MINUS:
+            self.eat(MINUS)
+            node = UnaryOp(token, self.factor())
+            return node
+        elif token.type in (INTEGER, FLOAT):
             self.eat(token.type)
             return Num(token)
         elif token.type == LPAREN:

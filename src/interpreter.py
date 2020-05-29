@@ -29,6 +29,12 @@ class Interpreter(NodeVisitor):
         self.tokenizer = Tokenizer(self.text)
         self.parser = Parser(self.tokenizer.create_tokens())
 
+    def visit_UnaryOp(self, node):
+        if node.op.type == PLUS:
+            return + self.visit(node.expr)
+        elif node.op.type == MINUS:
+            return - self.visit(node.expr)
+
     def visit_BinOp(self, node):
         if node.op.type == PLUS:
             return self.visit(node.left) + self.visit(node.right)

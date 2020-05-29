@@ -1,4 +1,21 @@
-expr : term((PLUS|MINUS)term)*
-term : factor((MUL|DIV)factor)*
-factor : LPAREN expr RPAREN | INTEGER | FLOAT
+program: compound_statement DOT
+
+compound_statement: START statement_list END
+
+statement_list: statement | statement SEMI statement_list
+
+statement: compound_statement | assignment_statement | empty
+
+assignment_statement: variable ASSIGN expr
+
+empty:
+
+expr : term ((PLUS | MINUS) term)*
+
+term : factor ((MUL | DIV) factor)*
+
+factor : LPAREN expr RPAREN | (PLUS|MINUS) factor | INTEGER | FLOAT | variable
+
+variable: ID
+
 

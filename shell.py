@@ -1,8 +1,7 @@
 import sys
 from src.interpreter import Interpreter
-from src.tokenizer import Tokenizer
 
-def read_file(filename):
+def process_file(filename):
     with open(filename, "r") as file:
         text = file.read()
         interpreter = Interpreter(text)
@@ -15,4 +14,4 @@ if __name__ == '__main__':
         raise Exception("Missing source code!")
     else:
         filename = sys.argv[1]
-        read_file(filename)
+        process_file(filename)

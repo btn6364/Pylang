@@ -1,0 +1,115 @@
+from collections import OrderedDict
+from src.token_type import INTEGER, REAL
+from src.node_visitor import NodeVisitor
+"""
+Represents a symbol
+"""
+
+class Symbol:
+    def __init__(self, name, type=None):
+        self.name = name
+        self.type = type
+
+"""
+Represents built in type symbol
+"""
+class BuiltinTypeSymbol(Symbol):
+    def __init__(self, name):
+        super().__init__(name)
+
+    def __str__(self):
+        return self.name
+
+    def __repr__(self):
+        return self.__str__()
+
+"""
+Represents variable symbol
+"""
+class VarSymbol(Symbol):
+    def __init__(self, name, type):
+        super().__init__(name, type)
+
+    def __str__(self):
+        return f"({self.name}: {self.type})"
+
+    def __repr__(self):
+        return self.__str__()
+
+"""
+Represents a symbol table
+"""
+class SymbolTable:
+    def __init__(self):
+        self.symbols = OrderedDict()
+        self.init_builtins()
+
+    def init_builtins(self):
+        self.store(BuiltinTypeSymbol(INTEGER))
+        self.store(BuiltinTypeSymbol(REAL))
+
+    def __str__(self):
+        symbol_list = [value for value in self.symbols.values()]
+        out = f"Symbols: {symbol_list}"
+        return out
+
+    def __repr__(self):
+        return self.__str__()
+
+    #store a symbol
+    def store(self, symbol):
+        print(f"Define: {symbol}")
+        self.symbols[symbol.name] = symbol
+
+    #look up a symbol
+    def lookup(self, name):
+        print(f"Lookup: {name}")
+        return self.symbols.get(name) #either a Symbol or None
+
+class SymbolTableBuilder(NodeVisitor):
+    def __init__(self):
+        self.symbol_table = SymbolTable()
+
+    def visit_Block(self, node):
+        for declaration in node.declarations:
+            self.visit(declaration)
+        self.visit(node.compound_statement)
+
+    def visit_Program(self, node):
+        self.visit(node.block)
+
+    def visit_BinOp(self, node):
+        self.visit(node.left)
+        self.visit(node.right)
+
+    def visit_Num(self, node):
+        pass
+
+    def visit_UnaryOp(self, node):
+        self.visit(node.expr)
+
+    def visit_Compound(self, node):
+        for child in node.children:
+            self.visit(child)
+
+    def visit_NoOp(self, node):
+        pass
+
+    def visit_VariableDeclaration(self, node):
+        type_name = node.type_node.value
+        type_symbol = self.symbol_table.lookup(type_name)
+        var_name = node.var_node.value
+        var_symbol = VarSymbol(var_name, type_symbol)
+        self.symbol_table.store(var_symbol)
+
+
+
+if __name__ == '__main__':
+    symboltab = SymbolTable()
+    # int_type = BuiltinTypeSymbol("INTEGER")
+    # symboltab.store(int_type)
+    # print(symboltab)
+    #
+    # var_x = VarSymbol("x", int_type)
+    # symboltab.store(var_x)
+    print(symboltab)

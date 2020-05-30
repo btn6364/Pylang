@@ -1,6 +1,5 @@
-from src.token_type import INTEGER, FLOAT, PLUS, MINUS, MULTIPLY, DIVIDE, LPAREN, RPAREN, \
-                           DOT, BEGIN, END, DOT, ASSIGN, ID, SEMI, EOF
-from src.ast import UnaryOp, BinOp, Num, NoOp, Compound, Assign, Var
+from src.token_type import *
+from src.ast import *
 
 
 """
@@ -33,10 +32,69 @@ class Parser:
 
     def program(self):
         """
-        Program: BEGIN compound statement
+        Program: PROGRAM variable SEMI block DOT
         """
-        node = self.compound_statement()
+        self.eat(PROGRAM)
+        var_node = self.variable()
+        program_name = var_node.value
+        self.eat(SEMI)
+        block_node = self.block()
+        program_node = Program(program_name, block_node)
         self.eat(DOT)
+        return program_node
+
+    def block(self):
+        """
+        block: declarations compound_statement
+        """
+        declaration_nodes = self.declarations()
+        compound_statement_node = self.compound_statement()
+        node = Block(declaration_nodes, compound_statement_node)
+        return node
+
+    def declarations(self):
+        """
+        declarations: VAR (variable_declaration SEMI)+
+                     | empty
+        """
+        declarations = []
+        if self.current_token.type == VAR:
+            self.eat(VAR)
+            while self.current_token.type == ID:
+                variable_declaration = self.variable_declaration()
+                declarations.extend(variable_declaration)
+                self.eat(SEMI)
+        return declarations
+
+    def variable_declaration(self):
+        """
+        variable_declaration: ID (COMMA ID)* COLON type_spec
+        """
+        var_nodes = [Var(self.current_token)]
+        self.eat(ID)
+
+        while self.current_token.type == COMMA:
+            self.eat(COMMA)
+            var_nodes.append(Var(self.current_token))
+            self.eat(ID)
+        self.eat(COLON)
+
+        type_node = self.type_spec()
+        var_declarations = [
+            VariableDeclaration(var_node, type_node) for var_node in var_nodes
+        ]
+        return var_declarations
+
+    def type_spec(self):
+        """
+        type_spec: INTEGER | REAL
+        """
+        token = self.current_token
+        if self.current_token.type == INTEGER:
+            self.eat(INTEGER)
+        else:
+            self.eat(REAL)
+        node = Type(token)
         return node
 
     def compound_statement(self):
@@ -116,7 +174,7 @@ class Parser:
             self.eat(MINUS)
             node = UnaryOp(token, self.factor())
             return node
-        elif token.type in (INTEGER, FLOAT):
+        elif token.type in (INTEGER_CONST, REAL_CONST):
             self.eat(token.type)
             return Num(token)
         elif token.type == LPAREN:
@@ -133,12 +191,14 @@ class Parser:
         Rule: term: factor ((MUL|DIV) factor)*
         """
         node = self.factor()
-        while self.current_token.type in (MULTIPLY, DIVIDE):
+        while self.current_token.type in (MULTIPLY, INTEGER_DIV, FLOAT_DIV):
             token = self.current_token
             if token.type == MULTIPLY:
                 self.eat(MULTIPLY)
-            elif token.type == DIVIDE:
-                self.eat(DIVIDE)
+            elif token.type == INTEGER_DIV:
+                self.eat(INTEGER_DIV)
+            elif token.type == FLOAT_DIV:
+                self.eat(FLOAT_DIV)
             node = BinOp(left=node, op=token, right=self.factor())
         return node
 

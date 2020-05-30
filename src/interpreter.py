@@ -1,4 +1,4 @@
-from src.token_type import INTEGER, FLOAT, PLUS, MINUS, MULTIPLY, DIVIDE, LPAREN, RPAREN, EOF
+from src.token_type import *
 from src.tokenizer import Tokenizer
 from src.parser import Parser
 
@@ -29,6 +29,20 @@ class Interpreter(NodeVisitor):
         self.tokenizer = Tokenizer(self.text)
         self.parser = Parser(self.tokenizer.create_tokens())
         self.GLOBAL_VARS = dict()
+
+    def visit_Program(self, node):
+        self.visit(node.block)
+
+    def visit_Block(self, node):
+        for declaration in node.declarations:
+            self.visit(declaration)
+        self.visit(node.compound_statement)
+
+    def visit_VariableDeclaration(self, node):
+        pass
+
+    def visit_Type(self, node):
+        pass
 
     def visit_Compound(self, node):
         for child in node.children:
@@ -63,7 +77,9 @@ class Interpreter(NodeVisitor):
             return self.visit(node.left) - self.visit(node.right)
         elif node.op.type == MULTIPLY:
             return self.visit(node.left) * self.visit(node.right)
-        elif node.op.type == DIVIDE:
+        elif node.op.type == INTEGER_DIV:
+            return self.visit(node.left) // self.visit(node.right)
+        elif node.op.type == FLOAT_DIV:
             return self.visit(node.left) / self.visit(node.right)
 
     def visit_Num(self, node):

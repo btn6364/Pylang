@@ -1,10 +1,14 @@
-from src.token_type import INTEGER, FLOAT, PLUS, MINUS, MULTIPLY, DIVIDE, LPAREN, RPAREN, EOF, \
-                           BEGIN, END, ID, ASSIGN, DOT, SEMI
+from src.token_type import *
 from src.token import Token
 
 RESERVED_KEYWORDS = {
-    "BEGIN": Token("BEGIN", BEGIN),
-    "END": Token("END", END)
+    'PROGRAM': Token(PROGRAM, 'PROGRAM'),
+    'VAR': Token(VAR, 'VAR'),
+    'DIV': Token(INTEGER_DIV, 'DIV'),
+    'INTEGER': Token(INTEGER, 'INTEGER'),
+    'REAL': Token(REAL, 'REAL'),
+    'BEGIN': Token(BEGIN, 'BEGIN'),
+    'END': Token(END, 'END'),
 }
 
 """
@@ -40,6 +44,14 @@ class Tokenizer:
         else:
             return self.text[peek_pos]
 
+    def skip_comments(self):
+        """
+        Skip comments in the input
+        Comment has the form of # comment #
+        """
+        while self.current_char != "}":
+            self.next()
+        self.next() # skip the last }
 
     def skip_whitespaces(self):
         """
@@ -57,9 +69,9 @@ class Tokenizer:
             result += self.current_char
             self.next()
         if "." in result:
-            return Token(FLOAT, float(result))
+            return Token(REAL_CONST, float(result))
         else:
-            return Token(INTEGER, int(result))
+            return Token(INTEGER_CONST, int(result))
 
     def id_keywords(self):
         """
@@ -78,7 +90,12 @@ class Tokenizer:
         :return: the set of tokens
         """
         while self.current_char:
-            if self.current_char.isspace():
+            #handle comments
+            if self.current_char == "{":
+                self.next()
+                self.skip_comments()
+            #handle spaces
+            elif self.current_char.isspace():
                 self.skip_whitespaces()
             #handle keywords and ids
             elif self.current_char.isalpha():
@@ -86,11 +103,19 @@ class Tokenizer:
             #handle numbers
             elif self.current_char.isdigit():
                 self.tokens.append(self.multi_digit_number())
-            #handle := assignment
+            # handle := assignment
             elif self.current_char == ":" and self.advance() == "=":
                 self.next()
                 self.next()
                 self.tokens.append(Token(ASSIGN, ":="))
+            #handle colon
+            elif self.current_char == ":":
+                self.next()
+                self.tokens.append(Token(COLON, ":"))
+            #handle comma
+            elif self.current_char == ",":
+                self.next()
+                self.tokens.append(Token(COMMA, ","))
             #handle semi
             elif self.current_char == ";":
                 self.next()
@@ -111,7 +136,7 @@ class Tokenizer:
                 self.tokens.append(Token(MULTIPLY, "*"))
             elif self.current_char == "/":
                 self.next()
-                self.tokens.append(Token(DIVIDE, "/"))
+                self.tokens.append(Token(FLOAT_DIV, "/"))
             elif self.current_char == "(":
                 self.next()
                 self.tokens.append(Token(LPAREN, "("))
@@ -119,6 +144,7 @@ class Tokenizer:
                 self.next()
                 self.tokens.append(Token(RPAREN, ")"))
             else:
+                print(self.current_char)
                 self.tokenizer_error(self.current_char)
         self.tokens.append(Token(EOF, None))
         return self.tokens

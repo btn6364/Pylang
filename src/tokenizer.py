@@ -49,9 +49,9 @@ class Tokenizer:
         Skip comments in the input
         Comment has the form of # comment #
         """
-        while self.current_char != "}":
+        while self.current_char != "@":
             self.next()
-        self.next() # skip the last }
+        self.next() # skip the last @
 
     def skip_whitespaces(self):
         """
@@ -91,7 +91,7 @@ class Tokenizer:
         """
         while self.current_char:
             #handle comments
-            if self.current_char == "{":
+            if self.current_char == "@":
                 self.next()
                 self.skip_comments()
             #handle spaces

@@ -72,6 +72,9 @@ class Interpreter(NodeVisitor):
     def visit_Num(self, node):
         return node.value
 
+    def visit_ProcedureDeclaration(self, node):
+        pass
+
     def error(self):
         raise Exception("Interpreter error.")
 

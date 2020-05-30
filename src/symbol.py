@@ -66,6 +66,9 @@ class SymbolTable:
         print(f"Lookup: {name}")
         return self.symbols.get(name) #either a Symbol or None
 
+"""
+Building symbol table
+"""
 class SymbolTableBuilder(NodeVisitor):
     def __init__(self):
         self.symbol_table = SymbolTable()
@@ -115,4 +118,7 @@ class SymbolTableBuilder(NodeVisitor):
 
         if var_symbol is None:
             raise NameError(f"{repr(var_name)} is not defined")
+
+    def visit_ProcedureDeclaration(self, node):
+        pass
 

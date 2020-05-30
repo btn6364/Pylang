@@ -9,6 +9,7 @@ RESERVED_KEYWORDS = {
     'REAL': Token(REAL, 'REAL'),
     'BEGIN': Token(BEGIN, 'BEGIN'),
     'END': Token(END, 'END'),
+    'PROCEDURE': Token(PROCEDURE, 'PROCEDURE')
 }
 
 """

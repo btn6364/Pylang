@@ -102,14 +102,17 @@ class SymbolTableBuilder(NodeVisitor):
         var_symbol = VarSymbol(var_name, type_symbol)
         self.symbol_table.store(var_symbol)
 
+    def visit_Assign(self, node):
+        var_name = node.left.value
+        var_symbol = self.symbol_table.lookup(var_name)
+        if var_symbol is None: #variable is not yet defined
+            raise NameError(f"{repr(var_name)} is not defined")
+        self.visit(node.right)
 
+    def visit_Var(self, node):
+        var_name = node.value
+        var_symbol = self.symbol_table.lookup(var_name)
 
-if __name__ == '__main__':
-    symboltab = SymbolTable()
-    # int_type = BuiltinTypeSymbol("INTEGER")
-    # symboltab.store(int_type)
-    # print(symboltab)
-    #
-    # var_x = VarSymbol("x", int_type)
-    # symboltab.store(var_x)
-    print(symboltab)
+        if var_symbol is None:
+            raise NameError(f"{repr(var_name)} is not defined")
+

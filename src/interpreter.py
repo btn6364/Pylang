@@ -72,7 +72,6 @@ class Interpreter(NodeVisitor):
     def visit_Num(self, node):
         return node.value
 
-
     def error(self):
         raise Exception("Interpreter error.")
 

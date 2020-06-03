@@ -39,6 +39,11 @@ class SemanticAnalyzer(NodeVisitor):
 
         var_name = node.var_node.value
         var_symbol = VarSymbol(var_name, type_symbol)
+
+        #check for duplicate declarations
+        if self.symbol_table.lookup(var_name) is not None:
+            raise Exception(f"[ERROR]: Duplicate identifier {var_name} found.")
+
         self.symbol_table.store(var_symbol)
 
     def visit_Assign(self, node):

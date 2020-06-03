@@ -1,6 +1,6 @@
 PROGRAM Semantic;
 VAR
-    x : INTEGER;
+    x: INTEGER;
 
 BEGIN
     x := y;

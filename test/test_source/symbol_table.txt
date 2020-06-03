@@ -1,7 +1,6 @@
 PROGRAM SymbolTable;
 VAR
-    x : INTEGER;
-    y : REAL;
+    x, y : INTEGER;
 
 BEGIN
 

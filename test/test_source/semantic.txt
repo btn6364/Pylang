@@ -1,0 +1,7 @@
+PROGRAM Semantic;
+VAR
+    x : INTEGER;
+
+BEGIN
+    x := y;
+END.

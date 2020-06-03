@@ -18,7 +18,8 @@ class BuiltinTypeSymbol(Symbol):
         super().__init__(name)
 
     def __str__(self):
-        return self.name
+        class_name = self.__class__.__name__
+        return f"<{class_name}(name='{self.name}')>"
 
     def __repr__(self):
         return self.__str__()
@@ -31,7 +32,8 @@ class VarSymbol(Symbol):
         super().__init__(name, type)
 
     def __str__(self):
-        return f"({self.name}: {self.type})"
+        class_name = self.__class__.__name__
+        return f"<{class_name}(name='{self.name}', type='{self.type}')>"
 
     def __repr__(self):
         return self.__str__()
@@ -49,9 +51,12 @@ class SymbolTable:
         self.store(BuiltinTypeSymbol(REAL))
 
     def __str__(self):
-        symbol_list = [value for value in self.symbols.values()]
-        out = f"Symbols: {symbol_list}"
-        return out
+        header = "Symbol table contents:"
+        out = ["\n", header, "_" * len(header)]
+        extension = [("%7s: %r") % (key, value) for key, value in self.symbols.items()]
+        out.extend(extension)
+        out.append("\n")
+        return "\n".join(out)
 
     def __repr__(self):
         return self.__str__()

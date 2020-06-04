@@ -1,12 +1,12 @@
 from src.node_visitor import NodeVisitor
 from src.symbol import VarSymbol
-from src.symbol import SymbolTable
+from src.symbol import ScopedSymbolTable
 """
 Semantic analyzer
 """
 class SemanticAnalyzer(NodeVisitor):
     def __init__(self):
-        self.symbol_table = SymbolTable()
+        self.symbol_table = ScopedSymbolTable(scope_name="global", scope_level=1)
 
     def visit_Block(self, node):
         for declaration in node.declarations:

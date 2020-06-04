@@ -41,9 +41,11 @@ class VarSymbol(Symbol):
 """
 Represents a symbol table
 """
-class SymbolTable:
-    def __init__(self):
+class ScopedSymbolTable:
+    def __init__(self, scope_name, scope_level):
         self.symbols = OrderedDict()
+        self.scope_name = scope_name
+        self.scope_level = scope_level
         self.init_builtins()
 
     def init_builtins(self):
@@ -51,8 +53,15 @@ class SymbolTable:
         self.store(BuiltinTypeSymbol(REAL))
 
     def __str__(self):
-        header = "Symbol table contents:"
-        out = ["\n", header, "_" * len(header)]
+        header1 = "SCOPE (SCOPE SYMBOL TABLE):"
+        out = ["\n", header1, '=' * len(header1)]
+        for header_name, header_value in (
+            ("Scope name: ", self.scope_name),
+            ("Scope level: ", self.scope_level)
+        ):
+            out.append("%-15s: %s" % (header_name, header_value))
+        header2 = "Scope (Scoped symbol table) contents:"
+        out.extend([header2, "-" * len(header2)])
         extension = []
         for key, value in self.symbols.items():
             extension.append(("%7s: %r") % (key, value))

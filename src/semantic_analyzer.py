@@ -8,6 +8,7 @@ class SemanticAnalyzer(NodeVisitor):
     def __init__(self):
         self.global_scope = ScopedSymbolTable(scope_name="global", scope_level=1)
         self.current_scope = self.global_scope
+        self.current_scope.init_builtins()
 
     def visit_Block(self, node):
         for declaration in node.declarations:
@@ -48,10 +49,6 @@ class SemanticAnalyzer(NodeVisitor):
 
         var_name = node.var_node.value
         var_symbol = VarSymbol(var_name, type_symbol)
-
-        #check for duplicate declarations
-        if self.current_scope.lookup(var_name) is not None:
-            raise Exception(f"[ERROR]: Duplicate identifier {var_name} found.")
 
         self.current_scope.store(var_symbol)
 

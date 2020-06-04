@@ -61,7 +61,6 @@ class ScopedSymbolTable:
         self.scope_name = scope_name
         self.scope_level = scope_level
         self.enclosing_scope = enclosing_scope # for scope chaining
-        self.init_builtins()
 
     def init_builtins(self):
         self.store(BuiltinTypeSymbol(INTEGER))
@@ -95,7 +94,13 @@ class ScopedSymbolTable:
 
     #look up a symbol
     def lookup(self, name):
-        print(f"Looking up: {name}")
-        return self.symbols.get(name) #either a Symbol or None
+        print(f"Looking up: {name}. (Scope name: {self.scope_name})")
+        symbol = self.symbols.get(name) #either a Symbol or None
 
+        if symbol:
+            return symbol
+
+        #go up the chain and look up the variable
+        if self.enclosing_scope:
+            return self.enclosing_scope.lookup(name)
 

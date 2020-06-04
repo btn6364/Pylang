@@ -85,6 +85,12 @@ class Type(AST):
         self.value = token.value
 
 class ProcedureDeclaration(AST):
-    def __init__(self, procedure_name, block_node):
+    def __init__(self, procedure_name, param_nodes, block_node):
         self.procedure_name = procedure_name
+        self.param_nodes = param_nodes # a list of parameters
         self.block_node = block_node
+
+class Param(AST):
+    def __init__(self, var_node, type_node):
+        self.var_node = var_node
+        self.type_node = type_node

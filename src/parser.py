@@ -55,27 +55,76 @@ class Parser:
     def declarations(self):
         """
         declarations: VAR (variable_declaration SEMI)+
-                     | (PROCEDURE ID SEMI block SEMI)*
+                     | (PROCEDURE ID (LPAREN parameter_list RPAREN)? SEMI block SEMI)*
                      | empty
         """
         declarations = []
-        if self.current_token.type == VAR:
-            self.eat(VAR)
-            while self.current_token.type == ID:
-                variable_declaration = self.variable_declaration()
-                declarations.extend(variable_declaration)
-                self.eat(SEMI)
+        while True:
+            if self.current_token.type == VAR:
+                self.eat(VAR)
+                while self.current_token.type == ID:
+                    var_declarations = self.variable_declaration()
+                    declarations.extend(var_declarations)
+                    self.eat(SEMI)
+            elif self.current_token.type == PROCEDURE:
+                self.eat(PROCEDURE)
+                procedure_name = self.current_token.value
+                self.eat(ID)
+                if self.current_token.type == LPAREN:
+                    self.eat(LPAREN)
+                    param_nodes = self.formal_parameter_list()
+                    self.eat(RPAREN)
 
-        while self.current_token.type == PROCEDURE:
-            self.eat(PROCEDURE)
-            procedure_name = self.current_token.value
-            self.eat(ID)
-            self.eat(SEMI)
-            block_node = self.block()
-            procedure_declaration = ProcedureDeclaration(procedure_name, block_node)
-            declarations.append(procedure_declaration)
-            self.eat(SEMI)
+                self.eat(SEMI)
+                block_node = self.block()
+                procedure_declaration = ProcedureDeclaration(procedure_name=procedure_name, param_nodes=param_nodes, block_node=block_node)
+                declarations.append(procedure_declaration)
+                self.eat(SEMI)
+            else:
+                break
         return declarations
+
+
+    def formal_parameter_list(self):
+        """
+        formal_parameter_list: formal_parameters
+                             | formal_parameters SEMI formal_parameter_list
+                             | empty
+        """
+        if self.current_token.type != ID:
+            return []
+
+        param_nodes = self.formal_parameters()
+        while self.current_token.type == SEMI:
+            self.eat(SEMI)
+            param_nodes.extend(self.formal_parameters())
+
+        return param_nodes
+
+
+    def formal_parameters(self):
+        """
+        formal_parameters: ID (COMMA ID))* COLON type_spec
+        Ex: x, y, z: INTEGER
+        """
+        param_nodes = []
+
+        param_tokens = [self.current_token]
+        self.eat(ID)
+        while self.current_token.type == COMMA:
+            self.eat(COMMA)
+            param_tokens.append(self.current_token)
+            self.eat(ID)
+
+        self.eat(COLON)
+        type_node = self.type_spec()
+
+        for param_token in param_tokens:
+            param_node = Param(Var(param_token), type_node)
+            param_nodes.append(param_node)
+
+        return param_nodes
+
 
     def variable_declaration(self):
         """

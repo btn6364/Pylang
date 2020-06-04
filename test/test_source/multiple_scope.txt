@@ -1,0 +1,17 @@
+PROGRAM MultipleScope;
+   VAR x, y : REAL;
+
+   PROCEDURE Alpha(a : INTEGER);
+      VAR y : INTEGER;
+   BEGIN
+
+   END;
+
+   PROCEDURE Beta(a : INTEGER);
+      VAR b : INTEGER;
+   BEGIN
+
+   END;
+BEGIN
+
+END.

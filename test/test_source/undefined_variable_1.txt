@@ -1,6 +1,11 @@
 PROGRAM Undefined;
-VAR
-    a : INTEGER;
+    VAR x, y : REAL;
+
+    PROCEDURE Alpha(a: INTEGER);
+        VAR y: INTEGER;
+    BEGIN
+        x := b + x + y;
+    END;
+
 BEGIN
-    a := 2 + b;
 END.

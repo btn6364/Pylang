@@ -39,13 +39,28 @@ class VarSymbol(Symbol):
         return self.__str__()
 
 """
+Procedure Symbol
+"""
+class ProcedureSymbol(Symbol):
+    def __init__(self, name, params=None):
+        super(ProcedureSymbol, self).__init__(name)
+        self.params = params if params else []
+
+    def __str__(self):
+        return f"<{self.__class__.__name__}(name={self.name}, params={self.params})>"
+
+    def __repr__(self):
+        return self.__str__()
+
+"""
 Represents a symbol table
 """
 class ScopedSymbolTable:
-    def __init__(self, scope_name, scope_level):
+    def __init__(self, scope_name, scope_level, enclosing_scope=None):
         self.symbols = OrderedDict()
         self.scope_name = scope_name
         self.scope_level = scope_level
+        self.enclosing_scope = enclosing_scope # for scope chaining
         self.init_builtins()
 
     def init_builtins(self):
@@ -57,7 +72,8 @@ class ScopedSymbolTable:
         out = ["\n", header1, '=' * len(header1)]
         for header_name, header_value in (
             ("Scope name: ", self.scope_name),
-            ("Scope level: ", self.scope_level)
+            ("Scope level: ", self.scope_level),
+            ("Enclosing scope", self.enclosing_scope.scope_name if self.enclosing_scope else None)
         ):
             out.append("%-15s: %s" % (header_name, header_value))
         header2 = "Scope (Scoped symbol table) contents:"

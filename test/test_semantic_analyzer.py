@@ -13,7 +13,6 @@ def process(filename):
         tree = parser.parse()
         symbol_table_builder = SemanticAnalyzer()
         symbol_table_builder.visit(tree)
-        print(symbol_table_builder.symbol_table)
 
 if __name__ == '__main__':
     if len(sys.argv) <= 1:

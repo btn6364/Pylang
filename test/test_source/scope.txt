@@ -1,0 +1,12 @@
+PROGRAM Scope;
+   VAR x, y: REAL;
+
+   PROCEDURE Alpha(a : INTEGER);
+      VAR y : INTEGER;
+   BEGIN
+
+   END;
+
+BEGIN
+
+END.
